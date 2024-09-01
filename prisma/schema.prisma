@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  username    String
+  email       String        @unique
+  password    String
+  createdAt   DateTime      @default(now())
+  transactions Transaction[]
+  jobposts    JobPost[]
+}
+
+model JobPost {
+  id                String       @id @default(uuid())
+  companyName       String
+  position          String
+  employmentType    String
+  primaryTag        String?
+  keyword           String[]
+  location          String[]
+  minSalary         Int
+  maxSalary         Int
+  jobDescription    String
+  applicationEmail  String
+  applicationProcess String
+  paymentStatus     Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  userId            String
+  transaction Transaction?
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+}
+
+model Transaction {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  amount     Int
+  userId     String
+  jobPostId  String? @unique
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobPost    JobPost? @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+}
